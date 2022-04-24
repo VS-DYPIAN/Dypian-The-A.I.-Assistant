@@ -1,23 +1,42 @@
+from typing_extensions import Self
 import speech_recognition as sr
 import random
-import tkinter    
-from tkinter import *
+import requests
 import datetime
 import pyttsx3
 import pyautogui
 import os
 import sys
 import time
-import requests
 import subprocess
 import webbrowser
 import pywhatkit
 import smtplib
 import psutil, pyttsx3, math 
-import ctypes
-from tkinter import _tkinter
-from PIL import ImageTk,Image
-from torch import take
+import wikipedia
+import re
+
+#user interface
+from PyQt5 import QtWidgets, QtGui,QtCore
+from PyQt5.QtGui import QMovie
+import sys
+import time
+from imageio import imopen
+import os
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.uic import loadUiType
+
+flags = QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint)
+FROM_MAIN,_ = loadUiType(os.path.join(os.path.dirname(__file__),"./scifi.ui"))
+
+#button
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import pyqtSlot
+
+#computational intelligence
 import wolframalpha
 app_id="GQ8PHQ-V7R6WA3EKU"
 app = wolframalpha.Client(app_id)
@@ -31,7 +50,7 @@ GREETINGS = ['hello ', 'DYPIAN', 'wake up', 'you there DYPIAN', 'time to work DY
              'ok DYPIAN', 'are you there']
 GREETINGS_RES = ['always there for you sir', 'i am ready sir',
                  'your wish my command', 'how can i help you sir?', 'i am online and ready sir']
-global query
+
 
 def speak(audio):
     Assistant.say(audio)
@@ -48,13 +67,7 @@ def computational_intelligence(question):
     except:
         speak("Sorry sir I couldn't fetch your question's answer. Please try again ")
         return None
-"""def location(self, location): # non working 
-        current_loc, target_loc, distance = loc.loc(location)
-        return current_loc, target_loc, distance
 
-def my_location(self):
-        city, state, country = loc.my_location()
-        return city, state, country"""
 def startup():
     speak("Initializing DYPIAN")
     speak("Starting all systems applications")
@@ -83,11 +96,13 @@ def wishMe():
 def takecommand():
     command = sr.Recognizer()
     with sr.Microphone() as source:
+        #speak("Give me command sir ")
         print("Listening.......")
         command.pause_threshold = 1
         audio = command.listen(source,0,5)
 
         try:
+            #speak("Please wait sir")
             print("Recognizing....")
             query = command.recognize_google(audio,language='en-in')
             print(f"you said : {query}")
@@ -97,13 +112,7 @@ def takecommand():
         query =str(query)
         return query.lower()
 
-def sendEmail(to, content):
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.ehlo()
-    server.starttls()
-    server.login('harshadsawantdada@gmail.com', 'V@142002')
-    server.sendmail('harshadsawantdada@gmail.com', to, content)
-    server.close()
+
 
 def convert_size(size_bytes):
    if size_bytes == 0:
@@ -124,6 +133,18 @@ def system_stats():
     final_res = f"Currently {cpu_stats} percent of CPU, {memory_in_use} of RAM out of total {total_memory}  is being used and battery level is at {battery_percent} percent"
     print(final_res) 
 
+
+
+def tell_me_about(topic):
+    try:
+        
+        res = wikipedia.summary(topic, sentences=3)
+
+        return res 
+    except Exception as e:
+        print(e)
+        return False
+
 def command():
     speak("Sir , please give me command")
     while True:
@@ -138,6 +159,11 @@ def command():
             speak("I am fine sir!")
             speak("Whats about you?")
         
+        #college information
+        elif "Admission" in query or 'Admission process' in query:
+            speak("ok sir ,this is found for your query")
+            webbrowser.open("https://engg.dypvp.edu.in/ugadmissions.aspx")
+            
         elif 'fine'  in query or 'nice'  in query :
             speak("Ok sir , great")
             speak("Whats can i do for you?")
@@ -170,17 +196,27 @@ def command():
             webbrowser.open(web)
             speak("done sir!")
         
-        elif 'open stack overflow' in query:
+        elif 'open stack overflow' in query or 'stack overflow' in query:
             speak("ok sir i will open the stack over flow website")
             webbrowser.open("https://www.stackoverflow.com")
         
-        elif 'open vs code' in query:
+        elif 'open vs code' in query or 'vs code' in query:
             codePath = "C:\\Users\\harsh\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+            os.startfile(codePath)
+            speak("done sir,now start coding ")
+        
+        elif 'open dev c plus plus  ' in query or 'dev editor' in query:
+            codePath = "C:\\Program Files (x86)\\Dev-Cpp\\devcpp.exe"
+            os.startfile(codePath)
+            speak("done sir,now start coding ")
+
+        elif 'open python idle' in query or 'python editor' in query:
+            codePath = "C:\\Python39\\pythonw.exe"
             os.startfile(codePath)
             speak("done sir,now start coding ")
 
         elif 'the time' in query or 'time' in query:
-            strTime = datetime.datetime.now().strftime("%H:%M:%S")    
+            strTime = datetime.datetime.now().strftime("%H:%M:%S")
             speak(f"Sir, the time is {strTime}")
         
         elif "switch the window" in query or "switch window" in query or "switch tab" in query:
@@ -190,21 +226,7 @@ def command():
                 time.sleep(1)
                 pyautogui.keyUp("alt")
         
-        elif 'send email' in query:  # non working
-            try:
-                speak("What should I say?")
-                content = takecommand()
-                to = "harshadsawantdada@gmail.com"    
-                sendEmail(to, content)
-                speak("Email has been sent!")
-            except Exception as e:
-                print(e)
-                speak("Sorry my friend Vaibhav bhai. I am not able to send this email")
-
-        elif "ip address" in query:
-                ip = requests.get('https://api.ipify.org').text
-                print(ip)
-                speak(f"Your ip address is {ip}")
+       
 
         #computational intelligence using wolfram
         elif "calculate" in query:
@@ -217,6 +239,50 @@ def command():
                 answer = computational_intelligence(question)
                 speak(answer)
 
+        elif "which is" in query or "which" in query:
+                question = query
+                answer = computational_intelligence(question)
+                speak(answer)
+        
+        elif re.search('tell me about', query):
+                topic = query.split(' ')[-1]
+                if topic:
+                    wiki_res = tell_me_about(topic)
+                    print(wiki_res)
+                    speak(wiki_res)
+                else:
+                    speak("Sorry sir. I couldn't load your query from my database. Please try again")
+    #college information
+        elif "Admission" in query or 'Admission process' in query:
+            speak("ok sir ,this is found for your query")
+            webbrowser.open("https://engg.dypvp.edu.in/ugadmissions.aspx")
+
+        elif "college" in query or 'Profile' in query or 'college profile' in query:
+            speak("ok sir ,this is found for your query")
+            webbrowser.open("https://engg.dypvp.edu.in/college-profile.aspx")
+
+        elif "computer engineering" in query or 'computer branch' in query:
+            speak("ok sir ,this is found for your query")
+            webbrowser.open("https://engg.dypvp.edu.in/computer-engineering.aspx")
+
+        elif "Academics" in query :
+            speak("ok sir ,this is found for your query")
+            webbrowser.open("https://engg.dypvp.edu.in/Acadmic-Calender.aspx")
+
+        elif " Training and placement" in query or 'placement' in query:
+            speak("ok sir ,this is found for your query")
+            webbrowser.open("https://engg.dypvp.edu.in/from-the-desk-of-tpo.aspx")
+
+        elif "University rankers" in query or 'Toppers' in query:
+            speak("ok sir ,this is found for your query")
+            webbrowser.open("https://engg.dypvp.edu.in/university-rankers.aspx")
+
+        elif "University rankers" in query or 'Toppers' in query:
+            speak("ok sir ,this is found for your query")
+            webbrowser.open("https://engg.dypvp.edu.in/vision-mission.aspx")
+        
+        
+        
         # system exit
         elif "goodbye" in query or "offline" in query or "bye" in query or "exit" in query:
                 speak("Alright sir, going offline. It was nice working with you")
@@ -230,96 +296,83 @@ def command():
            else:
                exit() 
         
+        elif "ip address" in query:
+                ip = requests.get('https://api.ipify.org').text
+                print(ip)
+                speak(f"Your ip address is {ip}")
+
         else:
+            speak("Command not found, Please speak again !")
             print("command not found")
 
-# user interface buttons keys
-def win():
-    
-    speak("ok sir i will open the google")
-    webbrowser.open("https://www.google.com")
- 
-def you():
-    speak("ok sir open the youtube.com")
-    webbrowser.open("https://www.youtube.com")
+#user interface functions
+def dpu():
+    speak("ok sir i will open the dpu website")
+    webbrowser.open("https://engg.dypvp.edu.in/")
 
-def Stop():
-    speak("Alright sir, going offline. It was nice working with you")
-    exit()
+FROM_MAIN,_ = loadUiType(os.path.join(os.path.dirname(__file__),"./scifi.ui"))
 
-# user interface 
-window = Tk()
-window.configure(bg = "black")
-SET_WIDTH = 1362
-SET_HEIGHT = 609 
-
-
-
-"""query = Entry(window,width=40,bg="black",fg="white",font = ('arial',18,'bold'))   
-query.pack(padx = 10,pady = 20)"""   #STARTING ENTRY BOX FOR TYPING
-
-def main():
-    # screen
-
-    bgImg = Image.open("C:\FOURTH SEMSTER\JARVIS\JARVIS AI\DYPIAN1.png")
-    window.title("D.Y.PIAN")
-    canvas = tkinter.Canvas(window,width = SET_WIDTH,height = SET_HEIGHT)
-
-    image=ImageTk.PhotoImage(bgImg)
-    canvas.create_image(0,0,anchor=NW,image=image)
-
-
-    # entry
-
-
-    btn = Button(text = "Run" ,bg = "black" ,fg="white",width=20,
-    activeforeground = "grey",activebackground = "black",command = command)
-    btn.pack(padx = 0,pady= 0)
-
-    btn = Button(text = "Stop",bg = "black" ,fg = "white",width=20,activeforeground = "grey",activebackground = "black",
-                 command=Stop).pack(side = TOP)
-    
-    canvas.configure(bg="black")
-
-    
-    
-    shape = canvas.create_oval(10,10,60,60,fill = "yellow")
-    xspeed = random.randrange(11,20)
-    yspeed = random.randrange(11, 20)
-
-    shape2 = canvas.create_oval(10,10,60,60,fill = "yellow")
-    xspeed2 = random.randrange(5,20)
-    yspeed2 = random.randrange(5,20)
-
-    canvas.pack()
-    
-    while True:
-        canvas.move(shape,xspeed,yspeed)
-        pos = canvas.coords(shape)
-        if pos[3]>= 609 or pos[1] <=0:
-            yspeed = -yspeed
-        if pos[2] >= 1362 or pos[0] <=0:
-            xspeed= -xspeed
-
-        canvas.move(shape2,xspeed2,yspeed2)
-        pos = canvas.coords(shape2)
-        if pos[3]>= 609 or pos[1] <=0:
-            yspeed2 = -yspeed2
-        if pos[2] >= 1362 or pos[0] <=0:
-            xspeed2= -xspeed2                                
-        window.update()
-        time.sleep(0.01)
+class Main(QMainWindow,FROM_MAIN):
+    def __init__(self,parent=None):
+        super(Main,self).__init__(parent)
+        self.setupUi(self)
+        #self.setFixedSize(1920,1080)
+        self.label_7 = QLabel
+        self.setGeometry(0,0,1920,1080)
+        self.setWindowFlags(flags)
         
-    
-def ball():
-    canvas = Canvas()
-    
+        self.label_7 = QMovie("./lib/gifloader.gif", QByteArray(), self)
+        self.label_7.setCacheMode(QMovie.CacheAll)
+        self.label_4.setMovie(self.label_7)
+        self.label_7.start()
 
+        self.ts = time.strftime("%A, %d %B")
 
-if __name__ == "__main__":
-    #startup()
-    wishMe()
-    convert_size(1)
-    system_stats()   
-    main()
+        
+        self.label.setPixmap(QPixmap("./lib/tuse.png"))
+        self.label_5.setText("<font size=8 color='white'>"+self.ts+"</font>")
+        self.label_5.setFont(QFont(QFont('Acens',8)))
+#ui button keys
+        
 
+        self.pushButton1 = QtWidgets.QPushButton(self)
+        self.pushButton1.setText("Dpu_website")
+        self.pushButton1.setFont(QFont('Arial', 30))
+        self.pushButton1.setStyleSheet("color:white")
+        self.pushButton1.setGeometry(QtCore.QRect(50,600,375,80))
+        self.pushButton1.clicked.connect(Dpu_clicked)
+        self.pushButton1.setStyleSheet('QPushButton { color: white;}')
+        
+        self.pushButton2 = QtWidgets.QPushButton(self)
+        self.pushButton2.setText("Run")
+        self.pushButton2.setFont(QFont('Arial', 30))
+        self.pushButton2.setStyleSheet("color:white")
+        self.pushButton2.setGeometry(QtCore.QRect(250,200,200,80))
+        self.pushButton2.clicked.connect(Run_clicked)
+        
+
+        self.pushButton3 = QtWidgets.QPushButton(self)
+        self.pushButton3.setText("Stop")
+        self.pushButton3.setFont(QFont('Arial', 30))
+        self.pushButton3.setStyleSheet("color:white")
+        self.pushButton3.setGeometry(QtCore.QRect(50,400,375,80))
+        self.pushButton3.clicked.connect(Stop_clicked)
+        
+ 
+        self.setStyleSheet("background-image : url(./lib/tus.png); border : 2px solid blue")
+
+def Run_clicked():
+   command()
+
+def Stop_clicked():
+   exit()
+
+def Dpu_clicked():
+    dpu()
+convert_size(1)
+system_stats()
+
+app = QtWidgets.QApplication(sys.argv)
+main = Main()
+main.show()
+exit(app.exec_())
